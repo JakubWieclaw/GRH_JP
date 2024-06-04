@@ -9,7 +9,7 @@ import edu.put.gymrathelper.database.Training
 class DatabaseHandler(context: Context) {
     private val db = Room.databaseBuilder(
         context,
-        GymDatabase::class.java, "gym-database"
+        GymDatabase::class.java, "gym_database"
     ).build()
     private val gymDao = db.gymDao()
 
