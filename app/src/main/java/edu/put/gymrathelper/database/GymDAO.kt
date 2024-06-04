@@ -8,6 +8,9 @@ import edu.gymrathelper.database.Account
 
 @Dao
 interface GymDAO {
+
+    @Query("SELECT * FROM accounts")
+    fun getAllAccounts(): List<Account>
     @Query("SELECT * FROM accounts WHERE username = :username")
     fun getAccount(username: String): Account
 
@@ -28,4 +31,10 @@ interface GymDAO {
 
     @Update
     fun modifyTraining(training: Training)
+
+    @Query("DELETE FROM accounts WHERE username = :username")
+    fun removeAccount(username: String)
+
+    @Query("DELETE FROM trainings WHERE id = :id")
+    fun removeTraining(id: Int)
 }

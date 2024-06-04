@@ -13,31 +13,42 @@ class DatabaseHandler(context: Context) {
     ).build()
     private val gymDao = db.gymDao()
 
-    suspend fun insertAccount(account: Account) {
+    fun removeAccount(account: Account) {
+        gymDao.removeAccount(account.username)
+    }
+
+    fun removeTraining(training: Training) {
+        gymDao.removeTraining(training.id)
+    }
+
+    fun getAllAccounts(): List<Account> {
+        return gymDao.getAllAccounts()
+    }
+    fun insertAccount(account: Account) {
         gymDao.insertAccount(account)
     }
 
-    suspend fun getAccountByLogin(login: String): Account? {
+    fun getAccountByLogin(login: String): Account? {
         return gymDao.getAccount(login)
     }
 
-    suspend fun insertTraining(training: Training) {
+    fun insertTraining(training: Training) {
         gymDao.insertTraining(training)
     }
 
-    suspend fun getAllTrainings(): List<Training> {
+    fun getAllTrainings(): List<Training> {
         return gymDao.getAllTrainings()
     }
 
-    suspend fun getTrainingById(id: Int): Training {
+   fun getTrainingById(id: Int): Training {
         return gymDao.getTrainingById(id)
     }
 
-    suspend fun modifyTraining(training: Training) {
+    fun modifyTraining(training: Training) {
         gymDao.modifyTraining(training)
     }
 
-    suspend fun checkIfLoginAttemptIsCorrect(username: String, password: String): Boolean {
+    fun checkIfLoginAttemptIsCorrect(username: String, password: String): Boolean {
         val passwordhash = password.hashCode().toString()
         val account = gymDao.getAccount(username)
         return account != null && account.passwordhash == passwordhash
