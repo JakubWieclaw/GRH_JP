@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -25,6 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.gymrathelper.database.Account
 import edu.put.gymrathelper.DatabaseHandler
 import edu.put.gymrathelper.database.Training
@@ -36,6 +39,8 @@ import edu.put.gymrathelper.ui.addTraining.AddExerciseButton
 import edu.put.gymrathelper.ui.addTraining.ExerciseInput
 import edu.put.gymrathelper.ui.addTraining.ExerciseInputField
 import edu.put.gymrathelper.ui.addTraining.Stopwatch
+import edu.put.gymrathelper.ui.addTraining.StopwatchViewModel
+import edu.put.gymrathelper.ui.addTraining.StopwatchViewModelFactory
 import edu.put.gymrathelper.ui.addTraining.TrainingTypeInput
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +55,9 @@ fun AddTrainingScreen(
     var trainingType by rememberSaveable { mutableStateOf("") }
     var exercises by rememberSaveable { mutableStateOf(listOf<ExerciseInput>()) }
     val coroutineScope = rememberCoroutineScope()
+
+    val viewModel: StopwatchViewModel = viewModel(factory = StopwatchViewModelFactory(LocalViewModelStoreOwner.current as androidx.savedstate.SavedStateRegistryOwner), key = "stopwatch_key")
+    val elapsedTime by viewModel.elapsedTime.observeAsState(0L)
 
     Column(
         modifier = Modifier
@@ -67,15 +75,11 @@ fun AddTrainingScreen(
             }
         )
 
-        TrainingTypeInput(trainingType) { trainingType = it }
-        Spacer(modifier = Modifier.height(16.dp))
-
+        // Stopwatch Component
         Stopwatch(key = "stopwatch_key")
         Spacer(modifier = Modifier.height(16.dp))
 
-        AddExerciseButton { exercises = exercises + ExerciseInput("", "") }
-        Spacer(modifier = Modifier.height(16.dp))
-
+        // Display exercises
         exercises.forEachIndexed { index, exercise ->
             ExerciseInputField(
                 exercise = exercise,
@@ -91,6 +95,14 @@ fun AddTrainingScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // AddExerciseButton for testing
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            AddExerciseButton {
+                exercises = exercises + ExerciseInput("", "")}
+            }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -104,7 +116,7 @@ fun AddTrainingScreen(
                         Training(
                             type = trainingType,
                             date = System.currentTimeMillis(),
-                            totalTime = 0L, // Replace with actual time
+                            totalTime = elapsedTime,
                             exercises = exercises.map { Exercise(it.name, it.weight) },
                         )
                     )
@@ -116,5 +128,6 @@ fun AddTrainingScreen(
                 Text("Save")
             }
         }
+        }
+
     }
-}

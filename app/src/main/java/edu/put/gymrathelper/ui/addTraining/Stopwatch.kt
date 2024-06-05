@@ -35,41 +35,35 @@ fun Stopwatch(key: String) {
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.SpaceBetween
+            .fillMaxWidth()
+            .padding(16.dp)
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.BottomCenter
+        Column(
+            modifier = Modifier.align(Alignment.BottomCenter)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+            Text(
+                text = "Stopwatch",
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = String.format(
+                    "%02d:%02d:%02d",
+                    elapsedTime / 3600000,
+                    (elapsedTime % 3600000) / 60000,
+                    (elapsedTime % 60000) / 1000
+                ),
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = "Stopwatch",
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Text(
-                    text = String.format(
-                        "%02d:%02d:%02d",
-                        elapsedTime / 3600000,
-                        (elapsedTime % 3600000) / 60000,
-                        (elapsedTime % 60000) / 1000
-                    ),
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(onClick = { viewModel.toggleTimer() }) {
-                        Text(if (isRunning) "Pause" else "Start")
-                    }
-                    Button(onClick = { viewModel.resetTimer() }) {
-                        Text("Reset")
-                    }
+                Button(onClick = { viewModel.toggleTimer() }) {
+                    Text(if (isRunning) "Pause" else "Start")
+                }
+                Button(onClick = { viewModel.resetTimer() }) {
+                    Text("Reset")
                 }
             }
         }

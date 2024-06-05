@@ -51,6 +51,6 @@ class DatabaseHandler(context: Context) {
     fun checkIfLoginAttemptIsCorrect(username: String, password: String): Boolean {
         val passwordhash = password.hashCode().toString()
         val account = gymDao.getAccount(username)
-        return account != null && account.passwordhash == passwordhash
+        return account.passwordhash == passwordhash
     }
 }
