@@ -11,6 +11,7 @@ interface GymDAO {
 
     @Query("SELECT * FROM accounts")
     fun getAllAccounts(): List<Account>
+
     @Query("SELECT * FROM accounts WHERE username = :username")
     fun getAccount(username: String): Account
 
