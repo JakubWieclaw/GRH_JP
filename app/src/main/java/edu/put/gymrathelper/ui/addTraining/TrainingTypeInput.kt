@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 fun TrainingTypeInput(trainingType: String, onTypeChange: (String) -> Unit) {
     OutlinedTextField(
         value = trainingType,
-        onValueChange = onTypeChange,
+        onValueChange = { onTypeChange(if (it.length <= 30) it else trainingType) },
         label = { Text("Type of Training") },
         modifier = Modifier.fillMaxWidth()
     )

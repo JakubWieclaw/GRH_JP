@@ -1,5 +1,6 @@
 package edu.put.gymrathelper.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,8 +9,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -17,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +47,9 @@ import edu.put.gymrathelper.ui.addTraining.Stopwatch
 import edu.put.gymrathelper.ui.addTraining.StopwatchViewModel
 import edu.put.gymrathelper.ui.addTraining.StopwatchViewModelFactory
 import edu.put.gymrathelper.ui.addTraining.TrainingTypeInput
+import edu.put.gymrathelper.ui.addTraining.TrainingViewModel
 
+@SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTrainingScreen(
@@ -50,19 +57,23 @@ fun AddTrainingScreen(
     onSave: () -> Unit,
     onBack: () -> Unit,
     dbHandler: DatabaseHandler,
+    trainingViewModel: TrainingViewModel,
     currentUser: Account
 ) {
     var trainingType by rememberSaveable { mutableStateOf("") }
-    var exercises by rememberSaveable { mutableStateOf(listOf<ExerciseInput>()) }
     val coroutineScope = rememberCoroutineScope()
+    val showDialog = mutableStateOf(false)
 
     val viewModel: StopwatchViewModel = viewModel(factory = StopwatchViewModelFactory(LocalViewModelStoreOwner.current as androidx.savedstate.SavedStateRegistryOwner), key = "stopwatch_key")
     val elapsedTime by viewModel.elapsedTime.observeAsState(0L)
 
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .verticalScroll(scrollState),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -75,19 +86,22 @@ fun AddTrainingScreen(
             }
         )
 
-        // Stopwatch Component
+        TrainingTypeInput(trainingType) { trainingType = if (it.length <= 30) it else trainingType } // Restrict to 30 characters
+        Spacer(modifier = Modifier.height(16.dp))
+
         Stopwatch(key = "stopwatch_key")
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Display exercises
-        exercises.forEachIndexed { index, exercise ->
+        trainingViewModel.exercises.value.forEachIndexed { index, exercise ->
             ExerciseInputField(
                 exercise = exercise,
                 onExerciseChange = { updatedExercise ->
-                    exercises = exercises.toMutableList().also { it[index] = updatedExercise }
+                    trainingViewModel.exercises.value = trainingViewModel.exercises.value.toMutableList().also { it[index] = updatedExercise }
                 },
                 onRemove = {
-                    exercises = exercises.toMutableList().also { it.removeAt(index) }
+                    if (trainingViewModel.exercises.value.isNotEmpty() && index < trainingViewModel.exercises.value.size) {
+                        trainingViewModel.exercises.value = trainingViewModel.exercises.value.toMutableList().also { it.removeAt(index) }
+                    }
                 }
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -95,39 +109,76 @@ fun AddTrainingScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // AddExerciseButton for testing
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            AddExerciseButton {
-                exercises = exercises + ExerciseInput("", "")}
+            if (trainingViewModel.exercises.value.size < 10) {
+                AddExerciseButton {
+                    trainingViewModel.exercises.value += ExerciseInput("", "")
+                }
+            } else {
+                Text("Maximum of 10 exercises reached")
             }
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Button(onClick = onCancel) {
-                Text("Cancel")
+            Button(onClick = {
+                trainingViewModel.exercises.value = emptyList()
+                viewModel.stopTimer()
+                onCancel()
+            }) {
+                Text("Cancel Training")
             }
             Button(onClick = {
-                coroutineScope.launch(Dispatchers.IO) {
-                    dbHandler.insertTraining(
-                        Training(
-                            type = trainingType,
-                            date = System.currentTimeMillis(),
-                            totalTime = elapsedTime,
-                            exercises = exercises.map { Exercise(it.name, it.weight) },
+                if (trainingViewModel.exercises.value.isNotEmpty() && trainingType.isNotEmpty()) {
+                    coroutineScope.launch(Dispatchers.IO) {
+                        dbHandler.insertTraining(
+                            Training(
+                                type = trainingType,
+                                date = System.currentTimeMillis(),
+                                totalTime = elapsedTime,
+                                exercises = trainingViewModel.exercises.value.map {
+                                    Exercise(
+                                        it.name,
+                                        it.weight
+                                    )
+                                },
+                            )
                         )
-                    )
-                    withContext(Dispatchers.Main) {
-                        onSave()
+                        withContext(Dispatchers.Main) {
+                            trainingViewModel.exercises.value = emptyList()
+                            viewModel.stopTimer()
+                            onSave()
+                        }
                     }
                 }
+                else {
+                    showDialog.value = true
+
+                }
             }) {
-                Text("Save")
+                Text("Save Training")
             }
         }
-        }
-
     }
+    ShowDialog(showDialog = showDialog)
+}
+
+@Composable
+fun ShowDialog(showDialog: MutableState<Boolean>) {
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text("Error") },
+            text = { Text("Training type and exercises are required") },
+            confirmButton = {
+                Button(onClick = { showDialog.value = false }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+}

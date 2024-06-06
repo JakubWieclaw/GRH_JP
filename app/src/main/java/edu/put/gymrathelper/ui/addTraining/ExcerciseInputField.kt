@@ -26,14 +26,14 @@ fun ExerciseInputField(
     ) {
         OutlinedTextField(
             value = exercise.name,
-            onValueChange = { onExerciseChange(exercise.copy(name = it)) },
+            onValueChange = { onExerciseChange(exercise.copy(name = if (it.length <= 30) it else exercise.name)) },
             label = { Text("Exercise") },
             modifier = Modifier.weight(1f)
         )
         Spacer(modifier = Modifier.width(8.dp))
         OutlinedTextField(
             value = exercise.weight,
-            onValueChange = { onExerciseChange(exercise.copy(weight = it)) },
+            onValueChange = { onExerciseChange(exercise.copy(weight = if (it.length <= 30) it else exercise.weight)) },
             label = { Text("Weight") },
             modifier = Modifier.weight(1f)
         )
