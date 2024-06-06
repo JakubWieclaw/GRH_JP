@@ -12,6 +12,7 @@ import edu.put.gymrathelper.ui.LoginScreen
 import edu.put.gymrathelper.ui.MainScreen
 import edu.put.gymrathelper.ui.RegistrationScreen
 import edu.put.gymrathelper.ui.TrainingDetailScreen
+import edu.put.gymrathelper.ui.ViewExerciseDataScreen
 import edu.put.gymrathelper.ui.ViewTrainingsScreen
 import edu.put.gymrathelper.ui.addTraining.TrainingViewModel
 import edu.put.gymrathelper.ui.theme.GymRatHelperTheme
@@ -43,7 +44,7 @@ class MainActivity : ComponentActivity() {
                         MainScreen(
                             onAddTrainingClick = { currentScreen = "addTraining" },
                             onViewTrainingsClick = { currentScreen = "viewTrainings" },
-                            onViewExerciseDataClick = { /* Navigate to View Exercise Data Screen */ },
+                            onViewExerciseDataClick = { currentScreen = "viewExerciseData"},
                             onLogoutClick = { currentScreen = "login" },
                             dbHandler = dbHandler,
                             currentUser = user
@@ -76,6 +77,10 @@ class MainActivity : ComponentActivity() {
                             onBackClick = { currentScreen = "viewTrainings" }
                         )
                     }
+                    "viewExerciseData" -> ViewExerciseDataScreen(
+                        dbUrl = "https://gymrathelper-default-rtdb.europe-west1.firebasedatabase.app/exercises.json",
+                        onBackClick = { currentScreen = "main" }
+                    )
                 }
             }
         }
