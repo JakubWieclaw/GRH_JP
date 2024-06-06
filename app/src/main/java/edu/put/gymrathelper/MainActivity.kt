@@ -67,7 +67,8 @@ class MainActivity : ComponentActivity() {
                     )
                     "trainingDetail" -> selectedTraining?.let { training ->
                         TrainingDetailScreen(
-                            training = training,
+                            trainingId = training.id.toLong(),
+                            dbHandler = dbHandler,
                             onDeleteClick = {
                                 dbHandler.removeTraining(training)
                                 currentScreen = "viewTrainings"

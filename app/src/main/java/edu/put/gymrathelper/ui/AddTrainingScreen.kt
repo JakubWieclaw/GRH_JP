@@ -139,7 +139,7 @@ fun AddTrainingScreen(
                             Training(
                                 type = trainingType,
                                 date = System.currentTimeMillis(),
-                                totalTime = elapsedTime,
+                                totalTime = elapsedTime/1000,
                                 exercises = trainingViewModel.exercises.value.map {
                                     Exercise(
                                         it.name,

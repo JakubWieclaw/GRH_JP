@@ -40,7 +40,7 @@ class DatabaseHandler(context: Context) {
         return gymDao.getAllTrainings()
     }
 
-   fun getTrainingById(id: Int): Training {
+   fun getTrainingById(id: Long): Training {
         return gymDao.getTrainingById(id)
     }
 

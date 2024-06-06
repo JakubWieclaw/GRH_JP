@@ -19,7 +19,7 @@ interface GymDAO {
     fun insertAccount(account: Account)
 
     @Query("SELECT * FROM trainings WHERE id = :id")
-    fun getTrainingById(id: Int): Training
+    fun getTrainingById(id: Long): Training
 
     @Query("SELECT * FROM trainings WHERE type = :type")
     fun getTrainingsByType(type: String): List<Training>
