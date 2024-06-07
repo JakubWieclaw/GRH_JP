@@ -65,9 +65,9 @@ fun AddTrainingScreen(
 ) {
     var trainingType by rememberSaveable { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
-    val showDialog = mutableStateOf(false)
-    val confirmCancelDialog = mutableStateOf(false)
-    val confirmSaveDialog = mutableStateOf(false)
+    val showDialog = rememberSaveable { mutableStateOf(false) }
+    val confirmCancelDialog = rememberSaveable { mutableStateOf(false) }
+    val confirmSaveDialog = rememberSaveable { mutableStateOf(false) }
 
     val viewModel: StopwatchViewModel = viewModel(factory = StopwatchViewModelFactory(LocalViewModelStoreOwner.current as androidx.savedstate.SavedStateRegistryOwner), key = "stopwatch_key")
     val elapsedTime by viewModel.elapsedTime.observeAsState(0L)
@@ -101,15 +101,15 @@ fun AddTrainingScreen(
         Stopwatch(key = "stopwatch_key")
         Spacer(modifier = Modifier.height(16.dp))
 
-        trainingViewModel.exercises.value.forEachIndexed { index, exercise ->
+        trainingViewModel.exercises.forEachIndexed { index, exercise ->
             ExerciseInputField(
                 exercise = exercise,
                 onExerciseChange = { updatedExercise ->
-                    trainingViewModel.exercises.value = trainingViewModel.exercises.value.toMutableList().also { it[index] = updatedExercise }
+                    trainingViewModel.exercises = trainingViewModel.exercises.toMutableList().also { it[index] = updatedExercise }
                 },
                 onRemove = {
-                    if (trainingViewModel.exercises.value.isNotEmpty() && index < trainingViewModel.exercises.value.size) {
-                        trainingViewModel.exercises.value = trainingViewModel.exercises.value.toMutableList().also { it.removeAt(index) }
+                    if (trainingViewModel.exercises.isNotEmpty() && index < trainingViewModel.exercises.size) {
+                        trainingViewModel.exercises = trainingViewModel.exercises.toMutableList().also { it.removeAt(index) }
                     }
                 }
             )
@@ -122,9 +122,9 @@ fun AddTrainingScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            if (trainingViewModel.exercises.value.size < 10) {
+            if (trainingViewModel.exercises.size < 10) {
                 AddExerciseButton {
-                    trainingViewModel.exercises.value += ExerciseInput("", "")
+                    trainingViewModel.exercises += ExerciseInput("", "")
                 }
             } else {
                 Text("Maximum of 10 exercises reached")
@@ -149,15 +149,15 @@ fun AddTrainingScreen(
     ShowDialog(showDialog = showDialog)
     ShowCancelDialog(onConfirm = onCancel, showDialog = confirmCancelDialog, stopwatchViewModel = viewModel)
     ShowSaveDialog(onConfirm = {
-        if (trainingViewModel.exercises.value.isNotEmpty() && trainingType.isNotEmpty()) {
+        if (trainingViewModel.exercises.isNotEmpty() && trainingType.isNotEmpty()) {
             coroutineScope.launch(Dispatchers.IO) {
                 dbHandler.insertTraining(
                     Training(
                         userId = currentUser.id,
                         type = trainingType,
                         date = System.currentTimeMillis(),
-                        totalTime = elapsedTime/1000,
-                        exercises = trainingViewModel.exercises.value.map {
+                        totalTime = elapsedTime / 1000,
+                        exercises = trainingViewModel.exercises.map {
                             Exercise(
                                 it.name,
                                 it.weight
@@ -166,22 +166,20 @@ fun AddTrainingScreen(
                     )
                 )
                 withContext(Dispatchers.Main) {
-                    trainingViewModel.exercises.value = emptyList()
+                    trainingViewModel.exercises = emptyList()
                     viewModel.stopTimer()
                     onSave()
                 }
             }
-        }
-        else {
+        } else {
             showDialog.value = true
-
         }
         viewModel.stopTimer()
         viewModel.resetTimer()
         viewModel.isRunning.value = false
     }, showDialog = confirmSaveDialog , stopwatchViewModel = viewModel)
-
 }
+
 
 @Composable
 fun ShowDialog(showDialog: MutableState<Boolean>) {

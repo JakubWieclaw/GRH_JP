@@ -4,8 +4,10 @@ package edu.put.gymrathelper
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.gymrathelper.database.Account
 import edu.put.gymrathelper.database.Training
 import edu.put.gymrathelper.ui.AddTrainingScreen
@@ -27,6 +29,7 @@ class MainActivity : ComponentActivity() {
                 val dbHandler = DatabaseHandler(this)
                 var currentUser by rememberSaveable { mutableStateOf<Account?>(null) }
                 var selectedTraining by rememberSaveable { mutableStateOf<Training?>(null) }
+                val trainingViewModel: TrainingViewModel = viewModel()
 
                 when (currentScreen) {
                     "login" -> LoginScreen(
@@ -56,7 +59,7 @@ class MainActivity : ComponentActivity() {
                         onSave = { currentScreen = "main" },
                         onBack = { currentScreen = "main" },
                         dbHandler = dbHandler,
-                        trainingViewModel = TrainingViewModel(),
+                        trainingViewModel = trainingViewModel,
                         currentUser = currentUser!!
                     )
                     "viewTrainings" -> currentUser?.let {

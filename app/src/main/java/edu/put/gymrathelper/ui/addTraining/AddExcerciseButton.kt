@@ -3,8 +3,10 @@ package edu.put.gymrathelper.ui.addTraining
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 
@@ -16,5 +18,5 @@ fun AddExerciseButton(onAddExercise: () -> Unit) {
 }
 
 class TrainingViewModel : ViewModel() {
-    var exercises = mutableStateOf(listOf<ExerciseInput>())
+    var exercises by mutableStateOf(listOf<ExerciseInput>())
 }
