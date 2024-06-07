@@ -58,7 +58,7 @@ fun ViewExerciseDataScreen(dbUrl: String, onBackClick: () -> Unit) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Exercise Details") },
+                    title = { Text(selectedExercise!!.name) },
                     navigationIcon = {
                         IconButton(onClick = { selectedExercise = null }) {
                             Icon(Icons.Default.ArrowBack, contentDescription = "Back")

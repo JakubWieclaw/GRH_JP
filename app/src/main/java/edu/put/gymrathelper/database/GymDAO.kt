@@ -27,6 +27,9 @@ interface GymDAO {
     @Query("SELECT * FROM trainings")
     fun getAllTrainings(): List<Training>
 
+    @Query("SELECT * FROM trainings WHERE userId = :userId")
+    fun getTrainingsByUserId(userId: Int): List<Training>
+
     @Insert
     fun insertTraining(training: Training)
 

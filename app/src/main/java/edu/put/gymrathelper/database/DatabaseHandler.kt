@@ -25,6 +25,9 @@ class DatabaseHandler(context: Context) {
         return gymDao.getAllAccounts()
     }
     fun insertAccount(account: Account) {
+        if (getAccountByLogin(account.username) != null) {
+            return
+        }
         gymDao.insertAccount(account)
     }
 
@@ -48,9 +51,13 @@ class DatabaseHandler(context: Context) {
         gymDao.modifyTraining(training)
     }
 
+    fun getTrainingsByUserId(userId: Int): List<Training> {
+        return gymDao.getTrainingsByUserId(userId)
+    }
+
     fun checkIfLoginAttemptIsCorrect(username: String, password: String): Boolean {
         val passwordhash = password.hashCode().toString()
         val account = gymDao.getAccount(username)
-        return account.passwordhash == passwordhash
+        return account != null && account.passwordhash == passwordhash
     }
 }

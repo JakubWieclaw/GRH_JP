@@ -1,5 +1,6 @@
 package edu.put.gymrathelper.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,6 +41,10 @@ fun MainScreen(
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+
+    BackHandler {
+        showLogoutDialog = true
+    }
 
     Column(
         modifier = Modifier

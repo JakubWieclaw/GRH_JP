@@ -45,6 +45,10 @@ class StopwatchViewModel(private val savedStateHandle: SavedStateHandle) : ViewM
         isRunning.value = !(isRunning.value ?: false)
     }
 
+    fun setRunning(running: Boolean) {
+        isRunning.value = running
+    }
+
     override fun onCleared() {
         super.onCleared()
         stopTimer()

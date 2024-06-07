@@ -58,14 +58,17 @@ class MainActivity : ComponentActivity() {
                         trainingViewModel = TrainingViewModel(),
                         currentUser = currentUser!!
                     )
-                    "viewTrainings" -> ViewTrainingsScreen(
-                        onBackClick = { currentScreen = "main" },
-                        onTrainingClick = { training ->
-                            selectedTraining = training
-                            currentScreen = "trainingDetail"
-                        },
-                        dbHandler = dbHandler
-                    )
+                    "viewTrainings" -> currentUser?.let {
+                        ViewTrainingsScreen(
+                            onBackClick = { currentScreen = "main" },
+                            onTrainingClick = { training ->
+                                selectedTraining = training
+                                currentScreen = "trainingDetail"
+                            },
+                            dbHandler = dbHandler,
+                            userId = it.id
+                        )
+                    }
                     "trainingDetail" -> selectedTraining?.let { training ->
                         TrainingDetailScreen(
                             trainingId = training.id.toLong(),

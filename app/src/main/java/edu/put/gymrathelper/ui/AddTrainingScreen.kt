@@ -21,10 +21,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -63,6 +65,8 @@ fun AddTrainingScreen(
     var trainingType by rememberSaveable { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     val showDialog = mutableStateOf(false)
+    val confirmCancelDialog = mutableStateOf(false)
+    val confirmSaveDialog = mutableStateOf(false)
 
     val viewModel: StopwatchViewModel = viewModel(factory = StopwatchViewModelFactory(LocalViewModelStoreOwner.current as androidx.savedstate.SavedStateRegistryOwner), key = "stopwatch_key")
     val elapsedTime by viewModel.elapsedTime.observeAsState(0L)
@@ -126,45 +130,49 @@ fun AddTrainingScreen(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Button(onClick = {
-                trainingViewModel.exercises.value = emptyList()
-                viewModel.stopTimer()
-                onCancel()
+                confirmCancelDialog.value = true
             }) {
                 Text("Cancel Training")
             }
             Button(onClick = {
-                if (trainingViewModel.exercises.value.isNotEmpty() && trainingType.isNotEmpty()) {
-                    coroutineScope.launch(Dispatchers.IO) {
-                        dbHandler.insertTraining(
-                            Training(
-                                type = trainingType,
-                                date = System.currentTimeMillis(),
-                                totalTime = elapsedTime/1000,
-                                exercises = trainingViewModel.exercises.value.map {
-                                    Exercise(
-                                        it.name,
-                                        it.weight
-                                    )
-                                },
-                            )
-                        )
-                        withContext(Dispatchers.Main) {
-                            trainingViewModel.exercises.value = emptyList()
-                            viewModel.stopTimer()
-                            onSave()
-                        }
-                    }
-                }
-                else {
-                    showDialog.value = true
-
-                }
+                confirmSaveDialog.value = true
             }) {
                 Text("Save Training")
             }
         }
     }
     ShowDialog(showDialog = showDialog)
+    ShowCancelDialog(onConfirm = onCancel, showDialog = confirmCancelDialog, stopwatchViewModel = viewModel)
+    ShowSaveDialog(onConfirm = {
+        if (trainingViewModel.exercises.value.isNotEmpty() && trainingType.isNotEmpty()) {
+            coroutineScope.launch(Dispatchers.IO) {
+                dbHandler.insertTraining(
+                    Training(
+                        userId = currentUser.id,
+                        type = trainingType,
+                        date = System.currentTimeMillis(),
+                        totalTime = elapsedTime/1000,
+                        exercises = trainingViewModel.exercises.value.map {
+                            Exercise(
+                                it.name,
+                                it.weight
+                            )
+                        },
+                    )
+                )
+                withContext(Dispatchers.Main) {
+                    trainingViewModel.exercises.value = emptyList()
+                    viewModel.stopTimer()
+                    onSave()
+                }
+            }
+        }
+        else {
+            showDialog.value = true
+
+        }
+    }, showDialog = confirmSaveDialog , stopwatchViewModel = viewModel)
+
 }
 
 @Composable
@@ -182,3 +190,58 @@ fun ShowDialog(showDialog: MutableState<Boolean>) {
         )
     }
 }
+
+@Composable
+fun ShowCancelDialog(onConfirm: () -> Unit, showDialog: MutableState<Boolean>, stopwatchViewModel: StopwatchViewModel) {
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text("Confirm Cancel") },
+            text = { Text("Are you sure you want to cancel the training?") },
+            confirmButton = {
+                Button(onClick = {
+                    showDialog.value = false
+                    onConfirm()
+                }) {
+                    Text("Yes")
+                }
+                stopwatchViewModel.stopTimer()
+                stopwatchViewModel.resetTimer()
+                stopwatchViewModel.isRunning.value = false
+            },
+            dismissButton = {
+                Button(onClick = { showDialog.value = false }) {
+                    Text("No")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun ShowSaveDialog(onConfirm: () -> Unit, showDialog: MutableState<Boolean>, stopwatchViewModel: StopwatchViewModel) {
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text("Confirm Save") },
+            text = { Text("Are you sure you want to save the training?") },
+            confirmButton = {
+                Button(onClick = {
+                    showDialog.value = false
+                    onConfirm()
+                }) {
+                    Text("Yes")
+                }
+                stopwatchViewModel.stopTimer()
+                stopwatchViewModel.resetTimer()
+                stopwatchViewModel.isRunning.value = false
+            },
+            dismissButton = {
+                Button(onClick = { showDialog.value = false }) {
+                    Text("No")
+                }
+            }
+        )
+    }
+}
+

@@ -23,11 +23,12 @@ import kotlinx.coroutines.withContext
 fun ViewTrainingsScreen(
     onBackClick: () -> Unit,
     onTrainingClick: (Training) -> Unit,
-    dbHandler: DatabaseHandler
+    dbHandler: DatabaseHandler,
+    userId: Int
 ) {
     val trainings by produceState(initialValue = emptyList<Training>()) {
         withContext(Dispatchers.IO) {
-            value = dbHandler.getAllTrainings()
+            value = dbHandler.getTrainingsByUserId(userId)
         }
     }
 

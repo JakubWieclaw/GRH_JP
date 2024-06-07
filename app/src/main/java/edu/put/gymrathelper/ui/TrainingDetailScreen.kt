@@ -1,6 +1,8 @@
 package edu.put.gymrathelper.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -21,11 +24,16 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -38,6 +46,7 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrainingDetailScreen(
@@ -60,68 +69,96 @@ fun TrainingDetailScreen(
 
     val formattedTotalTime = String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds)
 
-    if (training != null) {
+    var showDialog = remember { mutableStateOf(false) }
 
-
-        Column {
-            TopAppBar(
-                title = { Text("Training Details") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text("Confirm Delete") },
+            text = { Text("Are you sure you want to delete this training?") },
+            confirmButton = {
+                Button(onClick = {
+                    showDialog.value = false
+                    CoroutineScope(Dispatchers.IO).launch {
+                        onDeleteClick()
                     }
+                }) {
+                    Text("Confirm")
                 }
-            )
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {training?.let {
-                item {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            val formattedDate = dateFormat.format(it.date)
-                            Text("Date: $formattedDate", style = MaterialTheme.typography.bodySmall)
-                            Text("Type: ${training!!.type}", style = MaterialTheme.typography.bodyLarge)
-                            Text("Total Time: $formattedTotalTime", style = MaterialTheme.typography.bodySmall)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Exercises:", style = MaterialTheme.typography.bodyMedium)
-                            Divider(modifier = Modifier.padding(vertical = 8.dp))
-                            training!!.exercises.forEach { exercise ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(exercise.name, style = MaterialTheme.typography.labelMedium)
-                                    Text(exercise.weight, style = MaterialTheme.typography.labelMedium)
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(
-                                onClick = {
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        onDeleteClick()
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors()
+            },
+            dismissButton = {
+                Button(onClick = { showDialog.value = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    Surface(color = MaterialTheme.colorScheme.background) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Training Details") },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        }
+                    }
+                )
+            }
+        ) { paddingValues ->
+            if (training != null) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    training?.let {
+                        item {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                             ) {
-                                Text("Delete Training", color = Color.White)
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    val formattedDate = dateFormat.format(it.date)
+                                    Text("Date: $formattedDate", style = MaterialTheme.typography.titleMedium)
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text("Type: ${it.type}", style = MaterialTheme.typography.titleMedium)
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text("Time: $formattedTotalTime", style = MaterialTheme.typography.titleMedium)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text("Exercises:", style = MaterialTheme.typography.titleMedium)
+                                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+                                    it.exercises.forEach { exercise ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 4.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(exercise.name, style = MaterialTheme.typography.bodyMedium)
+                                            Text(exercise.weight, style = MaterialTheme.typography.bodyMedium)
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Button(
+                                        onClick = { showDialog.value = true },
+                                        colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error),
+                                    ) {
+                                        Text("Delete Training", color = Color.White)
+                                    }
+                                }
                             }
                         }
                     }
                 }
+            } else {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
             }
         }
-    } else {
-        CircularProgressIndicator(modifier = Modifier.padding(16.dp))
     }
 }
-

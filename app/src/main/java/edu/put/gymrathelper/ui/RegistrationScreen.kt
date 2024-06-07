@@ -67,6 +67,10 @@ fun RegistrationScreen(onRegistrationSuccess: () -> Unit, dbHandler: DatabaseHan
                 if (password == confirmPassword) {
                     CoroutineScope(Dispatchers.IO).launch {
                         val account = Account(id = 0, username = username, passwordhash = password.hashCode().toString())
+                        if (dbHandler.getAccountByLogin(username) != null) {
+                            errorMessage = "Account with this username already exists"
+                            return@launch
+                        }
                         dbHandler.insertAccount(account)
                         withContext(Dispatchers.Main) {
                             onRegistrationSuccess()
@@ -79,6 +83,16 @@ fun RegistrationScreen(onRegistrationSuccess: () -> Unit, dbHandler: DatabaseHan
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Register")
+        }
+
+        Text(text = "Already have an account?")
+        Button(
+            onClick = {
+                onRegistrationSuccess()
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Login")
         }
     }
 }

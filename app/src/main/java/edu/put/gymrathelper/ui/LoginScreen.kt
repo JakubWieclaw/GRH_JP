@@ -82,15 +82,15 @@ fun LoginScreen(onLoginClick: (Any?) -> Unit, onRegisterClick: () -> Unit, dbHan
         Spacer(modifier = Modifier.height(16.dp))
 
         // if there are no accounts in the database, show the register button
-        if (!accountsExist) {
-            Text(text = "Don't have an account?")
-            Button(
-                onClick = onRegisterClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Register")
-            }
+//        if (!accountsExist) {
+        Text(text = "Don't have an account?")
+        Button(
+            onClick = onRegisterClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Register")
         }
+//        }
         if (showError) {
             Snackbar(
                 modifier = Modifier.align(Alignment.CenterHorizontally),

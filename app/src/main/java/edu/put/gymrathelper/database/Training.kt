@@ -8,6 +8,7 @@ import androidx.room.TypeConverters
 @Entity(tableName = "trainings")
 data class Training(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val userId: Int,
     val type: String,
     val date: Long,
     val totalTime: Long,
