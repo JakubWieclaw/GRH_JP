@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import edu.gymrathelper.database.Account
 import edu.put.gymrathelper.database.Training
 import edu.put.gymrathelper.ui.AddTrainingScreen
@@ -21,11 +22,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            GymRatHelperTheme {
-                var currentScreen by remember { mutableStateOf("login") }
+            GymRatHelperTheme(darkTheme = false) {
+                var currentScreen by rememberSaveable { mutableStateOf("login") }
                 val dbHandler = DatabaseHandler(this)
-                var currentUser by remember { mutableStateOf<Account?>(null) }
-                var selectedTraining by remember { mutableStateOf<Training?>(null) }
+                var currentUser by rememberSaveable { mutableStateOf<Account?>(null) }
+                var selectedTraining by rememberSaveable { mutableStateOf<Training?>(null) }
 
                 when (currentScreen) {
                     "login" -> LoginScreen(
@@ -89,3 +90,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+

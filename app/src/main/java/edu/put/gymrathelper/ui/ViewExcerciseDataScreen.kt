@@ -1,6 +1,7 @@
 package edu.put.gymrathelper.ui
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -52,6 +53,10 @@ fun ViewExerciseDataScreen(dbUrl: String, onBackClick: () -> Unit) {
             firebaseExercises = fetchedExercises
             isLoading = false
         }
+    }
+
+    BackHandler{
+        onBackClick()
     }
 
     if (selectedExercise != null) {

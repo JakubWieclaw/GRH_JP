@@ -4,19 +4,3 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid) apply false
     id("com.google.devtools.ksp") version "1.9.24-1.0.20" apply false
 }
-
-//buildscript {
-//    repositories {
-//        google()
-//        mavenCentral()
-//        jcenter()
-//    }
-//}
-//
-//allprojects {
-//    repositories {
-//        google()
-//        mavenCentral()
-//        jcenter()
-//    }
-//}

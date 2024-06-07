@@ -62,9 +62,7 @@ fun TrainingListItem(
             }
             IconButton(
                 onClick = {
-                    CoroutineScope(Dispatchers.IO).launch {
                         onDeleteClick()
-                    }
                 },
                 modifier = Modifier.padding(start = 16.dp)
             ) {

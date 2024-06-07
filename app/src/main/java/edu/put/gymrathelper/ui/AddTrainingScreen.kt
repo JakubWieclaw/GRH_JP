@@ -1,6 +1,7 @@
 package edu.put.gymrathelper.ui
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -72,6 +73,10 @@ fun AddTrainingScreen(
     val elapsedTime by viewModel.elapsedTime.observeAsState(0L)
 
     val scrollState = rememberScrollState()
+
+    BackHandler{
+        onBack()
+    }
 
     Column(
         modifier = Modifier
@@ -171,6 +176,9 @@ fun AddTrainingScreen(
             showDialog.value = true
 
         }
+        viewModel.stopTimer()
+        viewModel.resetTimer()
+        viewModel.isRunning.value = false
     }, showDialog = confirmSaveDialog , stopwatchViewModel = viewModel)
 
 }
@@ -232,9 +240,6 @@ fun ShowSaveDialog(onConfirm: () -> Unit, showDialog: MutableState<Boolean>, sto
                 }) {
                     Text("Yes")
                 }
-                stopwatchViewModel.stopTimer()
-                stopwatchViewModel.resetTimer()
-                stopwatchViewModel.isRunning.value = false
             },
             dismissButton = {
                 Button(onClick = { showDialog.value = false }) {

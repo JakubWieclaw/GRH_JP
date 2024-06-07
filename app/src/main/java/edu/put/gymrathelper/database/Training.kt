@@ -1,10 +1,13 @@
 package edu.put.gymrathelper.database
 
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 @Entity(tableName = "trainings")
 data class Training(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
@@ -14,12 +17,13 @@ data class Training(
     val totalTime: Long,
     @TypeConverters(ExerciseListConverter::class)
     val exercises: List<Exercise>
-)
+) : Parcelable
 
+@Parcelize
 data class Exercise(
     val name: String,
     val weight: String
-)
+) : Parcelable
 
 class ExerciseListConverter {
     @TypeConverter

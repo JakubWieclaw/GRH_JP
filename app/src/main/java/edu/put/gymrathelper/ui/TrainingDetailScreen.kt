@@ -1,6 +1,7 @@
 package edu.put.gymrathelper.ui
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,6 +60,10 @@ fun TrainingDetailScreen(
         withContext(Dispatchers.IO) {
             value = dbHandler.getTrainingById(trainingId)
         }
+    }
+
+    BackHandler{
+        onBackClick()
     }
 
     val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())

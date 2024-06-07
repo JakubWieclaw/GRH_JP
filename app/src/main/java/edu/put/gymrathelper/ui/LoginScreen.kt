@@ -17,16 +17,16 @@ import kotlinx.coroutines.withContext
 fun LoginScreen(onLoginClick: (Any?) -> Unit, onRegisterClick: () -> Unit, dbHandler: DatabaseHandler) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var accountsExist by remember { mutableStateOf(true) }
+    //var accountsExist by remember { mutableStateOf(true) }
     val coroutineScope = rememberCoroutineScope()
     var showError by remember { mutableStateOf(false) }
 
     // Check if there are any accounts in the database
-    LaunchedEffect(Unit) {
-        coroutineScope.launch(Dispatchers.IO) {
-            accountsExist = dbHandler.getAllAccounts().isNotEmpty()
-        }
-    }
+//    LaunchedEffect(Unit) {
+//        coroutineScope.launch(Dispatchers.IO) {
+//            accountsExist = dbHandler.getAllAccounts().isNotEmpty()
+//        }
+//    }
 
     Column(
         modifier = Modifier
@@ -35,6 +35,20 @@ fun LoginScreen(onLoginClick: (Any?) -> Unit, onRegisterClick: () -> Unit, dbHan
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
     ) {
+        if (showError) {
+            Snackbar(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                action = {
+                    TextButton(onClick = { showError = false }) {
+                        Text("Dismiss")
+                    }
+                }
+            ) {
+                Text("Invalid username or password")
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+
         Text(text = "Login")
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -91,18 +105,7 @@ fun LoginScreen(onLoginClick: (Any?) -> Unit, onRegisterClick: () -> Unit, dbHan
             Text("Register")
         }
 //        }
-        if (showError) {
-            Snackbar(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                action = {
-                    TextButton(onClick = { showError = false }) {
-                        Text("Dismiss")
-                    }
-                }
-            ) {
-                Text("Invalid username or password")
-            }
-        }
+
     }
 
 }
